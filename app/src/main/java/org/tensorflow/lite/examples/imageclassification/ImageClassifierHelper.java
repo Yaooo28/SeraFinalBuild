@@ -13,7 +13,6 @@ import org.tensorflow.lite.support.image.ops.Rot90Op;
 import org.tensorflow.lite.task.core.BaseOptions;
 import org.tensorflow.lite.task.vision.classifier.Classifications;
 import org.tensorflow.lite.task.vision.classifier.ImageClassifier;
-
 public class ImageClassifierHelper {
     private static final String TAG = "ImageClassifierHelper";
     private static final int DELEGATE_CPU = 0;

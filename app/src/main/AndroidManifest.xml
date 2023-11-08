@@ -4,13 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="org.tensorflow.lite.examples.imageclassification">
 
-    <!-- Enable instant app support -->
     <dist:module dist:instant="true" />
-
-    <!-- Declare features -->
     <uses-feature android:name="android.hardware.camera" />
-
-    <!-- Declare permissions -->
     <uses-permission android:name="android.permission.CAMERA" />
 
     <application
@@ -30,15 +25,11 @@
             android:rotationAnimation="seamless"
             android:theme="@style/AppTheme"
             tools:targetApi="O">
-
-            <!-- Main app intent filter -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
-            <!-- Declare notch support -->
             <meta-data
                 android:name="android.notch_support"
                 android:value="true" />

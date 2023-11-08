@@ -1,55 +1,63 @@
-/*
- * Copyright 2022 The TensorFlow Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *             http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.tensorflow.lite.examples.imageclassification.fragments;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.os.Build;
+import android.speech.tts.TextToSpeech;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import org.tensorflow.lite.examples.imageclassification.databinding.ItemClassificationResultBinding;
+import org.tensorflow.lite.support.label.Category;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
-import org.tensorflow.lite.examples.imageclassification.databinding.ItemClassificationResultBinding;
-import org.tensorflow.lite.support.label.Category;
 
-/** Adapter for displaying the list of classifications for the image */
 public class ClassificationResultAdapter
         extends RecyclerView.Adapter<ClassificationResultAdapter.ViewHolder> {
     private static final String NO_VALUE = "--";
-    private List<Category> categories = new ArrayList<>();
+    private final List<Category> categories = new ArrayList<>();
     private int adapterSize = 0;
+    private final Context context;
+    private TextToSpeech textToSpeech;
+    private String lastSpokenLabel = "";
+
+    public ClassificationResultAdapter(Context context) {
+        this.context = context;
+
+        textToSpeech = new TextToSpeech(context, status -> {
+            if (status == TextToSpeech.SUCCESS) {
+                int result = textToSpeech.setLanguage(Locale.US);
+                if (result == TextToSpeech.LANG_MISSING_DATA ||
+                        result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                    Log.e("TextToSpeech", "Language is not supported.");
+                }
+            } else {
+                Log.e("TextToSpeech", "Initialization failed.");
+            }
+        });
+    }
 
     @SuppressLint("NotifyDataSetChanged")
     public void updateResults(List<Category> categories) {
         List<Category> sortedCategories = new ArrayList<>(categories);
-        Collections.sort(sortedCategories, new Comparator<Category>() {
-            @Override
-            public int compare(Category category1, Category category2) {
-                return category1.getIndex() - category2.getIndex();
-            }
-        });
-        this.categories = new ArrayList<>(Collections.nCopies(adapterSize, null));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            Collections.sort(sortedCategories, Comparator.comparingInt(Category::getIndex));
+        }
+        this.categories.clear();
         int min = Math.min(sortedCategories.size(), adapterSize);
-        for (int i = 0; i < min; i++) {
-            this.categories.set(i, sortedCategories.get(i));
+        this.categories.addAll(sortedCategories.subList(0, min));
+        if (!this.categories.isEmpty() && this.categories.get(0) != null) {
+            String currentLabel = this.categories.get(0).getLabel();
+            if (!currentLabel.equals(lastSpokenLabel)) {
+                speak(currentLabel);
+                lastSpokenLabel = currentLabel;
+            }
         }
         notifyDataSetChanged();
     }
@@ -75,9 +83,7 @@ public class ClassificationResultAdapter
     public int getItemCount() {
         return categories.size();
     }
-
-    /** Data structure for items in list */
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView tvLabel;
         private final TextView tvScore;
 
@@ -95,6 +101,14 @@ public class ClassificationResultAdapter
                 tvLabel.setText(NO_VALUE);
                 tvScore.setText(NO_VALUE);
             }
+        }
+    }
+
+    private void speak(String text) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, null);
+        } else {
+            textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null);
         }
     }
 }
