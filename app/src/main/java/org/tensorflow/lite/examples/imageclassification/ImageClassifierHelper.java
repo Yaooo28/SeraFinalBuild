@@ -60,7 +60,7 @@ public class ImageClassifierHelper {
     ) {
         return new ImageClassifierHelper(
                 0.5f,
-                2,
+                1,
                 1,
                 0,
                 0,

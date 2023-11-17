@@ -20,7 +20,7 @@ import org.tensorflow.lite.task.vision.classifier.Classifications;
 @RunWith(AndroidJUnit4.class)
 public class ImageClassificationTest {
     List<Category> controlCategories = new ArrayList<>(Arrays.asList(
-            new Category("cup", 0.7578125f))
+            new Category("default", 0.7578125f))
     );
 
     @Test
@@ -50,7 +50,7 @@ public class ImageClassificationTest {
                     }
                 });
         helper.setThreshold(0.0f);
-        helper.classify(loadImage("coffee.jpg"), 0);
+        helper.classify(loadImage("unknown.jpg"), 0);
     }
 
     private Bitmap loadImage(String fileName) {
