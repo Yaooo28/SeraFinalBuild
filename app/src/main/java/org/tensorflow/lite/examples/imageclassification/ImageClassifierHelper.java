@@ -184,7 +184,6 @@ public class ImageClassifierHelper {
 
 
         if (!isImageClassifierInitialized) {
-            // Initialize the ImageClassifier in the background
             new Thread(new Runnable() {
                 @Override
                 public void run() {
